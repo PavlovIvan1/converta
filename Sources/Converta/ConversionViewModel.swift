@@ -14,6 +14,7 @@ enum ConversionStatus: Equatable {
 final class ConversionViewModel: ObservableObject {
     @AppStorage("defaultInputFormat") private var defaultInputFormatRaw = MediaFormat.webm.rawValue
     @AppStorage("defaultOutputFormat") private var defaultOutputFormatRaw = MediaFormat.mp4.rawValue
+    @AppStorage("notifyOnCompletion") private var notifyOnCompletion = false
 
     @Published var inputURL: URL?
     @Published var inputFormat: MediaFormat = .webm
@@ -67,6 +68,9 @@ final class ConversionViewModel: ObservableObject {
             case .success(let url):
                 self.outputURL = url
                 self.status = .done
+                if self.notifyOnCompletion {
+                    NotificationManager.notifyConversionFinished(fileName: url.lastPathComponent)
+                }
             case .failure(let error):
                 self.status = .failed(error.localizedDescription)
             }

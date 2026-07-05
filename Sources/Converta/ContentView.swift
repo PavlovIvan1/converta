@@ -4,8 +4,11 @@ import UniformTypeIdentifiers
 struct ContentView: View {
     @StateObject private var viewModel = ConversionViewModel()
     @StateObject private var updateChecker = UpdateChecker()
+    @AppStorage("autoCheckForUpdates") private var autoCheckForUpdates = true
+    @AppStorage("hasShownStarPrompt") private var hasShownStarPrompt = false
     @State private var isTargeted = false
     @State private var showFailureAlert = false
+    @State private var showStarPrompt = false
 
     var body: some View {
         VStack(spacing: 28) {
@@ -43,11 +46,27 @@ struct ContentView: View {
         .onChange(of: statusFailed) { failed in
             showFailureAlert = failed
         }
+        .onChange(of: statusDone) { done in
+            if done && !hasShownStarPrompt {
+                hasShownStarPrompt = true
+                showStarPrompt = true
+            }
+        }
+        .alert("Нравится Converta?", isPresented: $showStarPrompt) {
+            Button("Не сейчас", role: .cancel) {}
+            Button("Поставить звезду ⭐") {
+                NSWorkspace.shared.open(URL(string: "https://github.com/PavlovIvan1/converta")!)
+            }
+        } message: {
+            Text("Если конвертер оказался полезным, поставьте звезду репозиторию на GitHub — это помогает другим найти проект.")
+        }
         .overlay(alignment: .topTrailing) {
             UpdateBannerView(checker: updateChecker)
         }
         .task {
-            await updateChecker.checkForUpdates()
+            if autoCheckForUpdates {
+                await updateChecker.checkForUpdates()
+            }
         }
     }
 
@@ -114,6 +133,10 @@ struct ContentView: View {
     private var statusFailed: Bool {
         if case .failed = viewModel.status { return true }
         return false
+    }
+
+    private var statusDone: Bool {
+        viewModel.status == .done
     }
 
     private var failureMessage: String? {
