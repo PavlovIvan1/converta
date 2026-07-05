@@ -1,6 +1,6 @@
 cask "converta" do
   version "1.0.0"
-  sha256 "PLACEHOLDER_SHA256" # updated once v#{version} is tagged and released
+  sha256 "c556d6a71769ada2aacc282652a24bfae6d0e29a949406d05c8380f7de6d2a20"
 
   url "https://github.com/PavlovIvan1/converta/archive/refs/tags/v#{version}.tar.gz"
   name "Converta"
