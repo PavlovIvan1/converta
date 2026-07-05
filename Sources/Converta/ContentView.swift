@@ -3,6 +3,7 @@ import UniformTypeIdentifiers
 
 struct ContentView: View {
     @StateObject private var viewModel = ConversionViewModel()
+    @StateObject private var updateChecker = UpdateChecker()
     @State private var isTargeted = false
     @State private var showFailureAlert = false
 
@@ -30,10 +31,7 @@ struct ContentView: View {
 
             Divider()
 
-            VStack(spacing: 12) {
-                outputFolderRow
-                actionButton
-            }
+            bottomBar
         }
         .padding(32)
         .frame(minWidth: 440, minHeight: 360)
@@ -45,19 +43,34 @@ struct ContentView: View {
         .onChange(of: statusFailed) { failed in
             showFailureAlert = failed
         }
+        .overlay(alignment: .topTrailing) {
+            UpdateBannerView(checker: updateChecker)
+        }
+        .task {
+            await updateChecker.checkForUpdates()
+        }
     }
 
-    private var outputFolderRow: some View {
-        HStack {
-            Text("Папка вывода:")
+    private var bottomBar: some View {
+        HStack(spacing: 12) {
+            Button {
+                viewModel.chooseOutputFolder()
+            } label: {
+                Image(systemName: "folder")
+            }
+            .help(viewModel.outputFolder?.path ?? "Выбрать папку вывода")
+
+            Text(viewModel.outputFolder?.lastPathComponent ?? "Папка не выбрана")
+                .font(.callout)
                 .foregroundStyle(.secondary)
-            Text(viewModel.outputFolder?.path ?? "не выбрана")
                 .lineLimit(1)
-                .truncationMode(.head)
-            Spacer()
-            Button("Выбрать…") { viewModel.chooseOutputFolder() }
+                .truncationMode(.middle)
+
+            Spacer(minLength: 12)
+
+            actionButton
+                .frame(width: 190)
         }
-        .font(.callout)
     }
 
     @ViewBuilder
@@ -162,6 +175,7 @@ private struct DropZoneView: View {
 
 private struct OutputPreviewView: View {
     let status: ConversionStatus
+    @State private var isFlipped = false
 
     var body: some View {
         RoundedRectangle(cornerRadius: 20)
@@ -171,7 +185,29 @@ private struct OutputPreviewView: View {
                 Image(systemName: symbolName)
                     .font(.system(size: 32))
                     .foregroundStyle(.secondary)
+                    .rotation3DEffect(
+                        .degrees(isFlipped ? 180 : 0),
+                        axis: (x: 1, y: 0, z: 0)
+                    )
             }
+            .onChange(of: status) { newStatus in
+                updateFlipping(for: newStatus)
+            }
+            .onAppear {
+                updateFlipping(for: status)
+            }
+    }
+
+    private func updateFlipping(for status: ConversionStatus) {
+        if status == .converting {
+            withAnimation(.easeInOut(duration: 0.7).repeatForever(autoreverses: true)) {
+                isFlipped = true
+            }
+        } else {
+            withAnimation(.default) {
+                isFlipped = false
+            }
+        }
     }
 
     private var symbolName: String {
