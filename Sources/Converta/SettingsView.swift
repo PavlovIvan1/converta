@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 struct SettingsView: View {
     @AppStorage("defaultInputFormat") private var defaultInputFormat = MediaFormat.webm.rawValue
@@ -12,6 +13,14 @@ struct SettingsView: View {
     private var t: L { L(lang: AppLanguage(rawValue: appLanguageRaw) ?? .systemDefault) }
 
     var body: some View {
+        VStack(spacing: 0) {
+            settingsForm
+            footer
+        }
+        .frame(width: 380, height: 380)
+    }
+
+    private var settingsForm: some View {
         Form {
             Section(t.settingsFormatSection) {
                 Picker(t.settingsInputLabel, selection: $defaultInputFormat) {
@@ -62,6 +71,19 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 380, height: 360)
+    }
+
+    private var footer: some View {
+        HStack(spacing: 4) {
+            Text(t.settingsFooterMadeWith)
+            Button(t.settingsFooterStarLink) {
+                NSWorkspace.shared.open(URL(string: "https://github.com/PavlovIvan1/converta")!)
+            }
+            .buttonStyle(.plain)
+            .underline()
+        }
+        .font(.caption)
+        .foregroundStyle(.secondary)
+        .padding(.bottom, 14)
     }
 }

@@ -64,6 +64,8 @@ struct L {
     var settingsAutoCheckUpdates: String { pick("Автоматически проверять обновления", "Automatically check for updates") }
     var settingsLanguageSection: String { pick("Язык", "Language") }
     var settingsLanguageLabel: String { pick("Язык приложения:", "App language:") }
+    var settingsFooterMadeWith: String { pick("Сделано с ❤️ —", "Made with ❤️ —") }
+    var settingsFooterStarLink: String { pick("поставьте звезду на GitHub", "star it on GitHub") }
 
     func updateBannerTitle(version: String) -> String { pick("Доступно обновление \(version)", "Update \(version) available") }
     var updateBannerNoNotes: String { pick("Список изменений недоступен.", "No release notes available.") }
