@@ -8,7 +8,7 @@
   A tiny, native macOS app that converts video files between formats — drag, drop, convert.
 </p>
 
-![Screenshot](screenshots/screenshot.png)
+![Demo](screenshots/demo.gif)
 
 ## Features
 
