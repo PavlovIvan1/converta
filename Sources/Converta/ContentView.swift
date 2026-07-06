@@ -49,12 +49,6 @@ struct ContentView: View {
         .onChange(of: statusFailed) { failed in
             showFailureAlert = failed
         }
-        .onChange(of: statusDone) { done in
-            if done && !hasShownStarPrompt {
-                hasShownStarPrompt = true
-                showStarPrompt = true
-            }
-        }
         .alert(t.starPromptTitle, isPresented: $showStarPrompt) {
             Button(t.starPromptLater, role: .cancel) {}
             Button(t.starPromptStar) {
@@ -111,6 +105,7 @@ struct ContentView: View {
         case .done:
             Button {
                 viewModel.revealOutputInFinder()
+                promptForStarIfNeeded()
             } label: {
                 HStack {
                     Image(systemName: "checkmark.circle.fill")
@@ -138,8 +133,12 @@ struct ContentView: View {
         return false
     }
 
-    private var statusDone: Bool {
-        viewModel.status == .done
+    private func promptForStarIfNeeded() {
+        guard !hasShownStarPrompt else { return }
+        hasShownStarPrompt = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            showStarPrompt = true
+        }
     }
 
     private var failureMessage: String? {
