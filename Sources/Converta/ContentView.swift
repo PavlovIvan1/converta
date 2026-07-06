@@ -6,14 +6,17 @@ struct ContentView: View {
     @StateObject private var updateChecker = UpdateChecker()
     @AppStorage("autoCheckForUpdates") private var autoCheckForUpdates = true
     @AppStorage("hasShownStarPrompt") private var hasShownStarPrompt = false
+    @AppStorage("appLanguage") private var appLanguageRaw = AppLanguage.systemDefault.rawValue
     @State private var isTargeted = false
     @State private var showFailureAlert = false
     @State private var showStarPrompt = false
 
+    private var t: L { L(lang: AppLanguage(rawValue: appLanguageRaw) ?? .systemDefault) }
+
     var body: some View {
         VStack(spacing: 28) {
             HStack(alignment: .center, spacing: 20) {
-                DropZoneView(fileName: viewModel.inputURL?.lastPathComponent, isTargeted: isTargeted)
+                DropZoneView(fileName: viewModel.inputURL?.lastPathComponent, isTargeted: isTargeted, placeholder: t.dropFilePlaceholder)
                     .onTapGesture { pickFile() }
                     .onDrop(of: [UTType.fileURL], isTargeted: $isTargeted, perform: handleDrop)
 
@@ -38,8 +41,8 @@ struct ContentView: View {
         }
         .padding(32)
         .frame(minWidth: 440, minHeight: 360)
-        .alert("Ошибка конвертации", isPresented: $showFailureAlert, presenting: failureMessage) { _ in
-            Button("OK", role: .cancel) {}
+        .alert(t.conversionErrorTitle, isPresented: $showFailureAlert, presenting: failureMessage) { _ in
+            Button(t.okButton, role: .cancel) {}
         } message: { message in
             Text(message)
         }
@@ -52,13 +55,13 @@ struct ContentView: View {
                 showStarPrompt = true
             }
         }
-        .alert("Нравится Converta?", isPresented: $showStarPrompt) {
-            Button("Не сейчас", role: .cancel) {}
-            Button("Поставить звезду ⭐") {
+        .alert(t.starPromptTitle, isPresented: $showStarPrompt) {
+            Button(t.starPromptLater, role: .cancel) {}
+            Button(t.starPromptStar) {
                 NSWorkspace.shared.open(URL(string: "https://github.com/PavlovIvan1/converta")!)
             }
         } message: {
-            Text("Если конвертер оказался полезным, поставьте звезду репозиторию на GitHub — это помогает другим найти проект.")
+            Text(t.starPromptMessage)
         }
         .overlay(alignment: .topTrailing) {
             UpdateBannerView(checker: updateChecker)
@@ -77,9 +80,9 @@ struct ContentView: View {
             } label: {
                 Image(systemName: "folder")
             }
-            .help(viewModel.outputFolder?.path ?? "Выбрать папку вывода")
+            .help(viewModel.outputFolder?.path ?? t.chooseFolderTooltip)
 
-            Text(viewModel.outputFolder?.lastPathComponent ?? "Папка не выбрана")
+            Text(viewModel.outputFolder?.lastPathComponent ?? t.outputFolderNotSelected)
                 .font(.callout)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
@@ -99,7 +102,7 @@ struct ContentView: View {
             Button {} label: {
                 HStack {
                     ProgressView().controlSize(.small)
-                    Text("Конвертация…")
+                    Text(t.converting)
                 }
                 .frame(maxWidth: .infinity)
             }
@@ -111,7 +114,7 @@ struct ContentView: View {
             } label: {
                 HStack {
                     Image(systemName: "checkmark.circle.fill")
-                    Text("Показать в Finder")
+                    Text(t.showInFinder)
                 }
                 .frame(maxWidth: .infinity)
             }
@@ -121,7 +124,7 @@ struct ContentView: View {
             Button {
                 viewModel.convert()
             } label: {
-                Text("Конвертировать")
+                Text(t.convert)
                     .frame(maxWidth: .infinity)
             }
             .disabled(!viewModel.canConvert)
@@ -170,6 +173,7 @@ struct ContentView: View {
 private struct DropZoneView: View {
     let fileName: String?
     let isTargeted: Bool
+    let placeholder: String
 
     var body: some View {
         RoundedRectangle(cornerRadius: 20)
@@ -185,7 +189,7 @@ private struct DropZoneView: View {
                     Image(systemName: fileName == nil ? "arrow.down.doc" : "film.fill")
                         .font(.system(size: 32))
                         .foregroundStyle(.secondary)
-                    Text(fileName ?? "Перетащите файл")
+                    Text(fileName ?? placeholder)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(2)

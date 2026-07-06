@@ -49,7 +49,7 @@ final class ConversionViewModel: ObservableObject {
         panel.canChooseFiles = false
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = false
-        panel.prompt = "Выбрать"
+        panel.prompt = L.current.chooseFolderPromptButton
         if panel.runModal() == .OK, let url = panel.urls.first {
             outputFolder = url
         }

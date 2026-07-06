@@ -7,6 +7,9 @@ struct UpdateBannerView: View {
     @State private var isUpdating = false
     @State private var updateResult: String?
     @AppStorage("dismissedUpdateVersion") private var dismissedVersion = ""
+    @AppStorage("appLanguage") private var appLanguageRaw = AppLanguage.systemDefault.rawValue
+
+    private var t: L { L(lang: AppLanguage(rawValue: appLanguageRaw) ?? .systemDefault) }
 
     var body: some View {
         if case .available(let version, let notes, let url) = checker.state, dismissedVersion != version {
@@ -34,7 +37,7 @@ struct UpdateBannerView: View {
         HStack(spacing: 8) {
             Image(systemName: "arrow.down.circle.fill")
                 .foregroundStyle(Color.accentColor)
-            Text("Доступно обновление \(version)")
+            Text(t.updateBannerTitle(version: version))
                 .font(.callout)
                 .lineLimit(1)
             Spacer(minLength: 8)
@@ -54,7 +57,7 @@ struct UpdateBannerView: View {
         Divider()
 
         ScrollView {
-            Text(notes.isEmpty ? "Список изменений недоступен." : notes)
+            Text(notes.isEmpty ? t.updateBannerNoNotes : notes)
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -68,7 +71,7 @@ struct UpdateBannerView: View {
         }
 
         HStack {
-            Button("Позже") {
+            Button(t.updateBannerLater) {
                 dismissedVersion = version
                 isExpanded = false
             }
@@ -77,7 +80,7 @@ struct UpdateBannerView: View {
 
             Spacer()
 
-            Button("На GitHub") {
+            Button(t.updateBannerOnGitHub) {
                 NSWorkspace.shared.open(url)
             }
 
@@ -87,7 +90,7 @@ struct UpdateBannerView: View {
                 if isUpdating {
                     ProgressView().controlSize(.small)
                 } else {
-                    Text("Обновить")
+                    Text(t.updateBannerUpdateButton)
                 }
             }
             .keyboardShortcut(.defaultAction)
@@ -103,7 +106,7 @@ struct UpdateBannerView: View {
             isUpdating = false
             switch result {
             case .success:
-                updateResult = "Обновлено! Перезапустите Converta."
+                updateResult = L.current.updateBannerDoneMessage
             case .failure(let error):
                 updateResult = error.localizedDescription
             }

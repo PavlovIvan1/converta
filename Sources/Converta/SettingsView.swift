@@ -6,25 +6,36 @@ struct SettingsView: View {
     @AppStorage("launchAtLogin") private var launchAtLogin = false
     @AppStorage("autoCheckForUpdates") private var autoCheckForUpdates = true
     @AppStorage("notifyOnCompletion") private var notifyOnCompletion = false
+    @AppStorage("appLanguage") private var appLanguageRaw = AppLanguage.systemDefault.rawValue
     @State private var loginItemError: String?
+
+    private var t: L { L(lang: AppLanguage(rawValue: appLanguageRaw) ?? .systemDefault) }
 
     var body: some View {
         Form {
-            Section("Формат по умолчанию") {
-                Picker("Вход:", selection: $defaultInputFormat) {
+            Section(t.settingsFormatSection) {
+                Picker(t.settingsInputLabel, selection: $defaultInputFormat) {
                     ForEach(MediaFormat.allCases) { format in
                         Text(format.label).tag(format.rawValue)
                     }
                 }
-                Picker("Выход:", selection: $defaultOutputFormat) {
+                Picker(t.settingsOutputLabel, selection: $defaultOutputFormat) {
                     ForEach(MediaFormat.allCases) { format in
                         Text(format.label).tag(format.rawValue)
                     }
                 }
             }
 
-            Section("Общие") {
-                Toggle("Запускать при входе в систему", isOn: $launchAtLogin)
+            Section(t.settingsLanguageSection) {
+                Picker(t.settingsLanguageLabel, selection: $appLanguageRaw) {
+                    ForEach(AppLanguage.allCases) { language in
+                        Text(language.displayName).tag(language.rawValue)
+                    }
+                }
+            }
+
+            Section(t.settingsGeneralSection) {
+                Toggle(t.settingsLaunchAtLogin, isOn: $launchAtLogin)
                     .onChange(of: launchAtLogin) { newValue in
                         do {
                             try LoginItemManager.setEnabled(newValue)
@@ -40,17 +51,17 @@ struct SettingsView: View {
                         .foregroundStyle(.red)
                 }
 
-                Toggle("Уведомлять по завершении конвертации", isOn: $notifyOnCompletion)
+                Toggle(t.settingsNotifyOnCompletion, isOn: $notifyOnCompletion)
                     .onChange(of: notifyOnCompletion) { newValue in
                         if newValue {
                             NotificationManager.requestAuthorizationIfNeeded()
                         }
                     }
 
-                Toggle("Автоматически проверять обновления", isOn: $autoCheckForUpdates)
+                Toggle(t.settingsAutoCheckUpdates, isOn: $autoCheckForUpdates)
             }
         }
         .formStyle(.grouped)
-        .frame(width: 380, height: 320)
+        .frame(width: 380, height: 360)
     }
 }

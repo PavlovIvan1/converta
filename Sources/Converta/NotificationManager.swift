@@ -9,7 +9,7 @@ enum NotificationManager {
     static func notifyConversionFinished(fileName: String) {
         guard Bundle.main.bundleIdentifier != nil else { return }
         let content = UNMutableNotificationContent()
-        content.title = "Конвертация завершена"
+        content.title = L.current.notificationTitle
         content.body = fileName
         content.sound = .default
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)

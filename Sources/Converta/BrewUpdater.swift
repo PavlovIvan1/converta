@@ -7,9 +7,9 @@ enum BrewError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .notFound:
-            return "Homebrew не найден. Обновите вручную: brew upgrade --cask converta"
+            return L.current.brewNotFound
         case .failed(let message):
-            return message.isEmpty ? "Не удалось обновить приложение." : message
+            return message.isEmpty ? L.current.brewFailedGeneric : message
         }
     }
 }

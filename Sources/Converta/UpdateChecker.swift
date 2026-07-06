@@ -21,7 +21,7 @@ final class UpdateChecker: ObservableObject {
     func checkForUpdates() async {
         state = .checking
         guard let url = URL(string: "https://api.github.com/repos/\(AppVersion.githubRepo)/releases/latest") else {
-            state = .error("Некорректный адрес репозитория")
+            state = .error(L.current.updateCheckerBadURL)
             return
         }
 

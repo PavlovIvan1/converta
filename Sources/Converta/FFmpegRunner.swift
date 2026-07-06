@@ -7,9 +7,9 @@ enum FFmpegError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .notFound:
-            return "FFmpeg не найден. Установите его командой: brew install ffmpeg"
+            return L.current.ffmpegNotFound
         case .failed(let message):
-            return message.isEmpty ? "Конвертация не удалась." : message
+            return message.isEmpty ? L.current.ffmpegFailedGeneric : message
         }
     }
 }
