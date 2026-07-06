@@ -1,6 +1,6 @@
 cask "converta" do
-  version "1.1.0"
-  sha256 "3c2682ff0e245ae25f59880a3e9a4b211bcc05567d87a90355dde6d8348e4326"
+  version "1.2.0"
+  sha256 "4a5741102929559f5d98dfe4eb533c3c7eb9ae505dd1f246fce884a1870dc1c6"
 
   url "https://github.com/PavlovIvan1/converta/archive/refs/tags/v#{version}.tar.gz"
   name "Converta"
